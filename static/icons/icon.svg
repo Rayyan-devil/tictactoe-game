@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#1a1a2e"/>
+  <rect x="40" y="40" width="130" height="130" rx="15" fill="rgba(255,255,255,0.1)" stroke="#fff" stroke-width="4"/>
+  <rect x="190" y="40" width="130" height="130" rx="15" fill="rgba(255,255,255,0.1)" stroke="#fff" stroke-width="4"/>
+  <rect x="340" y="40" width="130" height="130" rx="15" fill="rgba(255,255,255,0.1)" stroke="#fff" stroke-width="4"/>
+  <rect x="40" y="190" width="130" height="130" rx="15" fill="rgba(255,255,255,0.1)" stroke="#fff" stroke-width="4"/>
+  <rect x="190" y="190" width="130" height="130" rx="15" fill="rgba(255,255,255,0.1)" stroke="#fff" stroke-width="4"/>
+  <rect x="340" y="190" width="130" height="130" rx="15" fill="rgba(255,255,255,0.1)" stroke="#fff" stroke-width="4"/>
+  <rect x="40" y="340" width="130" height="130" rx="15" fill="rgba(255,255,255,0.1)" stroke="#fff" stroke-width="4"/>
+  <rect x="190" y="340" width="130" height="130" rx="15" fill="rgba(255,255,255,0.1)" stroke="#fff" stroke-width="4"/>
+  <rect x="340" y="340" width="130" height="130" rx="15" fill="rgba(255,255,255,0.1)" stroke="#fff" stroke-width="4"/>
+  <line x1="70" y1="70" x2="140" y2="140" stroke="#0d6efd" stroke-width="12" stroke-linecap="round"/>
+  <line x1="140" y1="70" x2="70" y2="140" stroke="#0d6efd" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="255" cy="105" r="35" fill="none" stroke="#dc3545" stroke-width="12"/>
+  <line x1="370" y1="70" x2="440" y2="140" stroke="#0d6efd" stroke-width="12" stroke-linecap="round"/>
+  <line x1="440" y1="70" x2="370" y2="140" stroke="#0d6efd" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="105" cy="255" r="35" fill="none" stroke="#dc3545" stroke-width="12"/>
+  <line x1="220" y1="220" x2="290" y2="290" stroke="#0d6efd" stroke-width="12" stroke-linecap="round"/>
+  <line x1="290" y1="220" x2="220" y2="290" stroke="#0d6efd" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="405" cy="255" r="35" fill="none" stroke="#dc3545" stroke-width="12"/>
+  <circle cx="105" cy="405" r="35" fill="none" stroke="#dc3545" stroke-width="12"/>
+  <line x1="220" y1="370" x2="290" y2="440" stroke="#0d6efd" stroke-width="12" stroke-linecap="round"/>
+  <line x1="290" y1="370" x2="220" y2="440" stroke="#0d6efd" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="405" cy="405" r="35" fill="none" stroke="#dc3545" stroke-width="12"/>
+</svg>
