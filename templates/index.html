@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container py-5">
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-6">
+                <div class="status-bar">
+                    <div class="d-flex justify-content-center">
+                        <div class="score">
+                            <span class="badge bg-primary me-2">X: <span id="scoreX">0</span></span>
+                            <span class="badge bg-danger">O: <span id="scoreO">0</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h1 class="text-center mb-4">Tic Tac Toe</h1>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="game-board">
+                    <div class="row g-2">
+                        <div class="col-4"><div class="cell" data-cell="0"></div></div>
+                        <div class="col-4"><div class="cell" data-cell="1"></div></div>
+                        <div class="col-4"><div class="cell" data-cell="2"></div></div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-4"><div class="cell" data-cell="3"></div></div>
+                        <div class="col-4"><div class="cell" data-cell="4"></div></div>
+                        <div class="col-4"><div class="cell" data-cell="5"></div></div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-4"><div class="cell" data-cell="6"></div></div>
+                        <div class="col-4"><div class="cell" data-cell="7"></div></div>
+                        <div class="col-4"><div class="cell" data-cell="8"></div></div>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <button id="resetButton" class="btn btn-secondary">Reset Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+</body>
+</html>
