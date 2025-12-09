@@ -5,38 +5,94 @@ class TicTacToe {
         this.scores = { X: 0, O: 0 };
         this.gameActive = true;
         this.isProcessing = false;
+        this.isPaused = false;
+        this.pendingComputerMove = null;
         this.winningCombos = [
             [0, 1, 2], [3, 4, 5], [6, 7, 8],
             [0, 3, 6], [1, 4, 7], [2, 5, 8],
             [0, 4, 8], [2, 4, 6]
         ];
 
-        this.initializeGame();
+        this.splashScreen = document.getElementById('splashScreen');
+        this.gameContainer = document.getElementById('gameContainer');
+        this.pauseOverlay = document.getElementById('pauseOverlay');
+        
+        this.showSplashScreen();
+    }
+
+    showSplashScreen() {
+        setTimeout(() => {
+            if (this.splashScreen) {
+                this.splashScreen.classList.add('fade-out');
+                setTimeout(() => {
+                    this.splashScreen.style.display = 'none';
+                    if (this.gameContainer) {
+                        this.gameContainer.style.display = 'block';
+                        this.gameContainer.classList.add('fade-in');
+                    }
+                    this.initializeGame();
+                }, 500);
+            }
+        }, 10000);
     }
 
     initializeGame() {
         document.querySelectorAll('.cell').forEach(cell => {
             cell.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.makeMove(cell);
+                if (!this.isPaused) this.makeMove(cell);
             });
             cell.addEventListener('touchend', (e) => {
                 e.preventDefault();
-                this.makeMove(cell);
+                if (!this.isPaused) this.makeMove(cell);
             });
         });
 
         const resetButton = document.getElementById('resetButton');
         if (resetButton) {
-            resetButton.addEventListener('click', () => this.resetBoard());
+            resetButton.addEventListener('click', () => {
+                if (!this.isPaused) this.resetBoard();
+            });
         }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.pauseGame();
+            } else {
+                this.resumeGame();
+            }
+        });
+
+        window.addEventListener('blur', () => this.pauseGame());
+        window.addEventListener('focus', () => this.resumeGame());
 
         this.updateScores();
         this.showMessage('Your turn! Tap to play', '');
     }
 
+    pauseGame() {
+        if (this.splashScreen && this.splashScreen.style.display !== 'none') return;
+        
+        this.isPaused = true;
+        if (this.pauseOverlay) {
+            this.pauseOverlay.classList.add('show');
+        }
+    }
+
+    resumeGame() {
+        this.isPaused = false;
+        if (this.pauseOverlay) {
+            this.pauseOverlay.classList.remove('show');
+        }
+        
+        if (this.pendingComputerMove) {
+            setTimeout(() => this.makeComputerMove(), 400);
+            this.pendingComputerMove = false;
+        }
+    }
+
     makeMove(cell) {
-        if (this.isProcessing) return;
+        if (this.isProcessing || this.isPaused) return;
         
         const index = parseInt(cell.dataset.cell);
 
@@ -58,12 +114,21 @@ class TicTacToe {
             this.currentPlayer = 'O';
             this.showMessage('AI is thinking...', '');
 
-            setTimeout(() => this.makeComputerMove(), 400);
+            if (this.isPaused) {
+                this.pendingComputerMove = true;
+            } else {
+                setTimeout(() => this.makeComputerMove(), 400);
+            }
         }
     }
 
     makeComputerMove() {
         if (!this.gameActive) return;
+        
+        if (this.isPaused) {
+            this.pendingComputerMove = true;
+            return;
+        }
 
         const move = this.getBestMove();
         const cell = document.querySelector(`[data-cell="${move}"]`);
@@ -177,10 +242,13 @@ class TicTacToe {
     }
 
     resetBoard() {
+        if (this.isPaused) return;
+        
         this.board = Array(9).fill('');
         this.gameActive = true;
         this.currentPlayer = 'X';
         this.isProcessing = false;
+        this.pendingComputerMove = null;
 
         document.querySelectorAll('.cell').forEach(cell => {
             cell.textContent = '';
