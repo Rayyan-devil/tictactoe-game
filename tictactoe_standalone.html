@@ -1,18 +1,37 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TicTacToe">
+    <meta name="theme-color" content="#6b21a8">
     <title>Tic Tac Toe</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
         body {
             position: relative;
             min-height: 100vh;
-            margin: 0;
-            overflow-x: hidden;
+            min-height: -webkit-fill-available;
             background-color: #1a1a2e;
             color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         body::before {
@@ -25,145 +44,368 @@
             background-image: url('https://w0.peakpx.com/wallpaper/479/272/HD-wallpaper-tree-black-branch-cool-dark-darkness-purple-sky-souls.jpg');
             background-size: cover;
             background-position: center;
-            background-attachment: fixed;
             filter: blur(5px);
             z-index: -1;
         }
 
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .splash-screen.fade-out {
+            opacity: 0;
+        }
+
+        .splash-content {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .splash-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            gap: 8px;
+            margin: 0 auto 2rem;
+            animation: splash-float 3s ease-in-out infinite;
+        }
+
+        @keyframes splash-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .splash-cell {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .splash-cell.x-mark {
+            color: #3b82f6;
+            animation: splash-pulse 1.5s ease-in-out infinite;
+        }
+
+        .splash-cell.o-mark {
+            color: #ef4444;
+            animation: splash-pulse 1.5s ease-in-out infinite 0.5s;
+        }
+
+        @keyframes splash-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+
+        .splash-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #6b21a8, #9333ea, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .splash-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 2rem;
+        }
+
+        .loading-bar {
+            width: 200px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 0 auto 1rem;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #6b21a8, #9333ea, #3b82f6);
+            border-radius: 3px;
+            animation: loading 10s linear forwards;
+        }
+
+        @keyframes loading {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .loading-text {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+        }
+
+        .pause-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 8888;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .pause-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .pause-content {
+            text-align: center;
+        }
+
+        .pause-icon {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #9333ea;
+            margin-bottom: 1rem;
+            letter-spacing: 0.5rem;
+            animation: pause-blink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pause-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .game-container {
+            opacity: 0;
+            display: none;
+        }
+
+        .game-container.fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
         .container {
             background: transparent;
+            max-width: 500px;
         }
 
         .game-board {
+            width: 100%;
             max-width: 400px;
             margin: 0 auto;
+            padding: 10px;
+        }
+
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            aspect-ratio: 1;
         }
 
         .cell {
             aspect-ratio: 1;
             background: rgba(255, 255, 255, 0.1);
-            border: 2px solid #fff;
-            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
+            font-size: clamp(2rem, 10vw, 4rem);
             font-weight: bold;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             backdrop-filter: blur(5px);
+            user-select: none;
         }
 
-        .cell:hover:not(.marked) {
-            background: rgba(255, 255, 255, 0.2);
+        .cell:active:not(.marked) {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.25);
         }
 
-        .cell.marked {
-            cursor: not-allowed;
+        @media (hover: hover) {
+            .cell:hover:not(.marked) {
+                background: rgba(255, 255, 255, 0.2);
+                transform: scale(1.02);
+            }
         }
 
-        .cell.x {
-            color: #0d6efd;
-        }
-
-        .cell.o {
-            color: #dc3545;
-        }
+        .cell.marked { cursor: not-allowed; }
+        .cell.x { color: #3b82f6; text-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+        .cell.o { color: #ef4444; text-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
 
         .cell.winner {
-            animation: pulse 1s infinite;
+            animation: winner-pulse 0.6s ease-in-out infinite alternate;
+            border-color: #fbbf24;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        @keyframes winner-pulse {
+            0% { transform: scale(1); box-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
+            100% { transform: scale(1.05); box-shadow: 0 0 30px rgba(251, 191, 36, 0.8); }
         }
 
         .status-bar {
             background: rgba(255, 255, 255, 0.1);
-            padding: 1rem;
-            border-radius: 8px;
-            backdrop-filter: blur(5px);
-        }
-
-        h1 {
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .badge {
-            font-size: 1rem;
-            padding: 0.5rem 1rem;
-        }
-
-        .bg-primary {
-            background-color: #0d6efd !important;
-        }
-
-        .bg-danger {
-            background-color: #dc3545 !important;
-        }
-
-        .btn-secondary {
-            background-color: #6c757d;
-            border-color: #6c757d;
-            color: #fff;
-            padding: 0.5rem 1.5rem;
+            font-size: clamp(0.8rem, 3vw, 1rem);
+            padding: 0.5rem 0.75rem;
             border-radius: 8px;
+        }
+
+        .bg-primary { background-color: #3b82f6 !important; }
+        .bg-danger { background-color: #ef4444 !important; }
+
+        h1 {
+            font-size: clamp(1.5rem, 6vw, 2.5rem);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            font-weight: 700;
+        }
+
+        .btn-game {
+            background: linear-gradient(135deg, #6b21a8 0%, #9333ea 100%);
+            border: none;
+            color: #fff;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(107, 33, 168, 0.4);
         }
 
-        .btn-secondary:hover {
-            background-color: #5c636a;
+        .btn-game:active { transform: scale(0.95); }
+
+        .game-message {
+            font-size: 1.2rem;
+            font-weight: 600;
+            min-height: 2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        @media (max-width: 576px) {
-            .cell {
-                font-size: 2rem;
-            }
+        .game-message.show { opacity: 1; }
+        .game-message.win { color: #fbbf24; text-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+        .game-message.lose { color: #ef4444; }
+        .game-message.draw { color: #a78bfa; }
+
+        @media (max-width: 360px) {
+            .board-grid { gap: 6px; }
+            .cell { border-radius: 8px; }
+            .splash-grid { grid-template-columns: repeat(3, 50px); }
+            .splash-cell { width: 50px; height: 50px; font-size: 1.5rem; }
         }
     </style>
 </head>
 <body>
-    <div class="container py-5">
-        <div class="row justify-content-center mb-4">
-            <div class="col-md-6">
-                <div class="status-bar">
-                    <div class="d-flex justify-content-center">
-                        <div class="score">
-                            <span class="badge bg-primary me-2">X: <span id="scoreX">0</span></span>
-                            <span class="badge bg-danger">O: <span id="scoreO">0</span></span>
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-grid">
+                <div class="splash-cell"></div>
+                <div class="splash-cell"></div>
+                <div class="splash-cell"></div>
+                <div class="splash-cell"></div>
+                <div class="splash-cell x-mark">X</div>
+                <div class="splash-cell"></div>
+                <div class="splash-cell"></div>
+                <div class="splash-cell"></div>
+                <div class="splash-cell o-mark">O</div>
+            </div>
+            <h1 class="splash-title">Tic Tac Toe</h1>
+            <p class="splash-subtitle">vs AI</p>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+            <p class="loading-text">Loading<span class="loading-dots"></span></p>
+        </div>
+    </div>
+
+    <div id="pauseOverlay" class="pause-overlay">
+        <div class="pause-content">
+            <div class="pause-icon">II</div>
+            <h2>Game Paused</h2>
+            <p>Return to continue playing</p>
+        </div>
+    </div>
+
+    <div id="gameContainer" class="game-container">
+        <div class="container py-4">
+            <div class="row justify-content-center mb-3">
+                <div class="col-11 col-sm-8 col-md-6">
+                    <div class="status-bar">
+                        <div class="d-flex justify-content-center">
+                            <span class="badge bg-primary me-2">You (X): <span id="scoreX">0</span></span>
+                            <span class="badge bg-danger">AI (O): <span id="scoreO">0</span></span>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <h1 class="text-center mb-4">Tic Tac Toe</h1>
+            <h1 class="text-center mb-3">Tic Tac Toe</h1>
 
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="game-board">
-                    <div class="row g-2">
-                        <div class="col-4"><div class="cell" data-cell="0"></div></div>
-                        <div class="col-4"><div class="cell" data-cell="1"></div></div>
-                        <div class="col-4"><div class="cell" data-cell="2"></div></div>
+            <div class="row justify-content-center">
+                <div class="col-11 col-sm-8 col-md-6">
+                    <div class="game-board">
+                        <div class="board-grid">
+                            <div class="cell" data-cell="0"></div>
+                            <div class="cell" data-cell="1"></div>
+                            <div class="cell" data-cell="2"></div>
+                            <div class="cell" data-cell="3"></div>
+                            <div class="cell" data-cell="4"></div>
+                            <div class="cell" data-cell="5"></div>
+                            <div class="cell" data-cell="6"></div>
+                            <div class="cell" data-cell="7"></div>
+                            <div class="cell" data-cell="8"></div>
+                        </div>
                     </div>
-                    <div class="row g-2">
-                        <div class="col-4"><div class="cell" data-cell="3"></div></div>
-                        <div class="col-4"><div class="cell" data-cell="4"></div></div>
-                        <div class="col-4"><div class="cell" data-cell="5"></div></div>
-                    </div>
-                    <div class="row g-2">
-                        <div class="col-4"><div class="cell" data-cell="6"></div></div>
-                        <div class="col-4"><div class="cell" data-cell="7"></div></div>
-                        <div class="col-4"><div class="cell" data-cell="8"></div></div>
-                    </div>
-                </div>
 
-                <div class="mt-4 text-center">
-                    <button id="resetButton" class="btn btn-secondary">Reset Game</button>
+                    <div class="mt-4 text-center">
+                        <button id="resetButton" class="btn btn-game">New Game</button>
+                    </div>
+                    
+                    <div id="gameMessage" class="game-message mt-3 text-center"></div>
                 </div>
             </div>
         </div>
@@ -176,29 +418,98 @@
                 this.board = Array(9).fill('');
                 this.scores = { X: 0, O: 0 };
                 this.gameActive = true;
+                this.isProcessing = false;
+                this.isPaused = false;
+                this.pendingComputerMove = null;
                 this.winningCombos = [
                     [0, 1, 2], [3, 4, 5], [6, 7, 8],
                     [0, 3, 6], [1, 4, 7], [2, 5, 8],
                     [0, 4, 8], [2, 4, 6]
                 ];
 
-                this.initializeGame();
+                this.splashScreen = document.getElementById('splashScreen');
+                this.gameContainer = document.getElementById('gameContainer');
+                this.pauseOverlay = document.getElementById('pauseOverlay');
+                
+                this.showSplashScreen();
+            }
+
+            showSplashScreen() {
+                setTimeout(() => {
+                    if (this.splashScreen) {
+                        this.splashScreen.classList.add('fade-out');
+                        setTimeout(() => {
+                            this.splashScreen.style.display = 'none';
+                            if (this.gameContainer) {
+                                this.gameContainer.style.display = 'block';
+                                this.gameContainer.classList.add('fade-in');
+                            }
+                            this.initializeGame();
+                        }, 500);
+                    }
+                }, 10000);
             }
 
             initializeGame() {
                 document.querySelectorAll('.cell').forEach(cell => {
-                    cell.addEventListener('click', () => this.makeMove(cell));
+                    cell.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        if (!this.isPaused) this.makeMove(cell);
+                    });
+                    cell.addEventListener('touchend', (e) => {
+                        e.preventDefault();
+                        if (!this.isPaused) this.makeMove(cell);
+                    });
                 });
 
-                document.getElementById('resetButton').addEventListener('click', () => this.resetBoard());
+                document.getElementById('resetButton').addEventListener('click', () => {
+                    if (!this.isPaused) this.resetBoard();
+                });
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        this.pauseGame();
+                    } else {
+                        this.resumeGame();
+                    }
+                });
+
+                window.addEventListener('blur', () => this.pauseGame());
+                window.addEventListener('focus', () => this.resumeGame());
 
                 this.updateScores();
+                this.showMessage('Your turn! Tap to play', '');
+            }
+
+            pauseGame() {
+                if (this.splashScreen && this.splashScreen.style.display !== 'none') return;
+                
+                this.isPaused = true;
+                if (this.pauseOverlay) {
+                    this.pauseOverlay.classList.add('show');
+                }
+            }
+
+            resumeGame() {
+                this.isPaused = false;
+                if (this.pauseOverlay) {
+                    this.pauseOverlay.classList.remove('show');
+                }
+                
+                if (this.pendingComputerMove) {
+                    setTimeout(() => this.makeComputerMove(), 400);
+                    this.pendingComputerMove = false;
+                }
             }
 
             makeMove(cell) {
-                const index = cell.dataset.cell;
+                if (this.isProcessing || this.isPaused) return;
+                
+                const index = parseInt(cell.dataset.cell);
 
                 if (this.board[index] === '' && this.gameActive) {
+                    this.isProcessing = true;
+                    
                     this.board[index] = this.currentPlayer;
                     cell.textContent = this.currentPlayer;
                     cell.classList.add('marked', this.currentPlayer.toLowerCase());
@@ -212,13 +523,23 @@
                     }
 
                     this.currentPlayer = 'O';
+                    this.showMessage('AI is thinking...', '');
 
-                    setTimeout(() => this.makeComputerMove(), 500);
+                    if (this.isPaused) {
+                        this.pendingComputerMove = true;
+                    } else {
+                        setTimeout(() => this.makeComputerMove(), 400);
+                    }
                 }
             }
 
             makeComputerMove() {
                 if (!this.gameActive) return;
+                
+                if (this.isPaused) {
+                    this.pendingComputerMove = true;
+                    return;
+                }
 
                 const move = this.getBestMove();
                 const cell = document.querySelector(`[data-cell="${move}"]`);
@@ -234,6 +555,8 @@
                         this.handleDraw();
                     } else {
                         this.currentPlayer = 'X';
+                        this.isProcessing = false;
+                        this.showMessage('Your turn!', '');
                     }
                 }
             }
@@ -253,7 +576,9 @@
                     return availableCorners[Math.floor(Math.random() * availableCorners.length)];
                 }
 
-                const availableMoves = this.board.map((cell, index) => cell === '' ? index : null).filter(cell => cell !== null);
+                const availableMoves = this.board
+                    .map((cell, index) => cell === '' ? index : null)
+                    .filter(cell => cell !== null);
                 return availableMoves[Math.floor(Math.random() * availableMoves.length)];
             }
 
@@ -261,7 +586,7 @@
                 for (let i = 0; i < this.board.length; i++) {
                     if (this.board[i] === '') {
                         this.board[i] = player;
-                        if (this.checkWin()) {
+                        if (this.checkWinForPlayer(player)) {
                             this.board[i] = '';
                             return i;
                         }
@@ -269,6 +594,12 @@
                     }
                 }
                 return -1;
+            }
+
+            checkWinForPlayer(player) {
+                return this.winningCombos.some(combo => {
+                    return combo.every(index => this.board[index] === player);
+                });
             }
 
             checkWin() {
@@ -293,31 +624,47 @@
 
             handleWin() {
                 this.gameActive = false;
+                this.isProcessing = false;
                 this.scores[this.currentPlayer]++;
                 this.updateScores();
-                setTimeout(() => {
-                    alert(`${this.currentPlayer}${this.currentPlayer === 'O' ? ' (Computer)' : ''} wins!`);
-                    this.resetBoard();
-                }, 500);
+                
+                if (this.currentPlayer === 'X') {
+                    this.showMessage('You Win!', 'win');
+                } else {
+                    this.showMessage('AI Wins!', 'lose');
+                }
             }
 
             handleDraw() {
                 this.gameActive = false;
-                setTimeout(() => {
-                    alert("It's a draw!");
-                    this.resetBoard();
-                }, 500);
+                this.isProcessing = false;
+                this.showMessage("It's a Draw!", 'draw');
+            }
+
+            showMessage(text, type) {
+                const messageEl = document.getElementById('gameMessage');
+                if (messageEl) {
+                    messageEl.textContent = text;
+                    messageEl.className = 'game-message mt-3 text-center show';
+                    if (type) messageEl.classList.add(type);
+                }
             }
 
             resetBoard() {
+                if (this.isPaused) return;
+                
                 this.board = Array(9).fill('');
                 this.gameActive = true;
                 this.currentPlayer = 'X';
+                this.isProcessing = false;
+                this.pendingComputerMove = null;
 
                 document.querySelectorAll('.cell').forEach(cell => {
                     cell.textContent = '';
                     cell.className = 'cell';
                 });
+                
+                this.showMessage('Your turn! Tap to play', '');
             }
 
             updateScores() {
